@@ -1,4 +1,4 @@
-package com.prasf.msfs.firstWidget
+package com.prasf.msfs.firstWidget;
 
 import java.awt.Color;
 import java.awt.Dimension;
