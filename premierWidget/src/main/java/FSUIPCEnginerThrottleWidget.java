@@ -36,7 +36,7 @@ import com.mouseviator.fsuipc.FSUIPCWrapper;
 import com.mouseviator.fsuipc.IFSUIPCListener;
 import com.mouseviator.fsuipc.datarequest.IDataRequest;
 import com.mouseviator.fsuipc.datarequest.primitives.DoubleRequest;
-
+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
 public class FSUIPCEnginerThrottleWidget {
 
 	/**
