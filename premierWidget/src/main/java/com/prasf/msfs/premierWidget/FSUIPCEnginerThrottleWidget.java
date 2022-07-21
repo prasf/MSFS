@@ -1,5 +1,6 @@
 package com.prasf.msfs.premierWidget;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -13,7 +14,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.AbstractQueue;
@@ -36,7 +38,7 @@ import com.mouseviator.fsuipc.FSUIPCWrapper;
 import com.mouseviator.fsuipc.IFSUIPCListener;
 import com.mouseviator.fsuipc.datarequest.IDataRequest;
 import com.mouseviator.fsuipc.datarequest.primitives.DoubleRequest;
-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
+
 public class FSUIPCEnginerThrottleWidget {
 
 	/**
@@ -55,7 +57,7 @@ public class FSUIPCEnginerThrottleWidget {
 	private static DoubleRequest eng1_rpm_cont;
 
 	int MAX_VALUE = 3500;
-	int value = 0;
+	int value=500;
 
 	//////////////////////////////
 	// RPM = 3000
@@ -64,11 +66,12 @@ public class FSUIPCEnginerThrottleWidget {
 	// zeroAngle : 226.42142857142878
 	// maxAngle : -42.94999999999999
 	// angleToUse : 187.93979591836754
-	boolean afficherBoutonReglage = false;
-	int centerX = 191;
-	int centerY = 180;
-	double zeroAngle = 226.42142857142878;
-	double maxAngle = -42.94999999999999;
+	boolean afficherBoutonReglage = true;
+	int centerX = 193;
+	int centerY = 181;
+	int x1 = centerX, x2 = 100, y1 = centerY, y2 = 278;
+	double zeroAngle = 0;
+	double maxAngle = 270;
 	double range = zeroAngle - maxAngle;
 
 	public static void main(String[] args) {
@@ -145,8 +148,6 @@ public class FSUIPCEnginerThrottleWidget {
 			});
 			add("South",button);
 
-			value = 0;
-
 			// Cette méthode permet d'ajouter des boutons qui permette le réglage de la
 			// gauge
 			if (afficherBoutonReglage)
@@ -193,7 +194,7 @@ public class FSUIPCEnginerThrottleWidget {
 			buttonReglagecentreXplus.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					centerX += 1;
+					x1 += 1;
 					repaint();
 				}
 			});
@@ -205,7 +206,7 @@ public class FSUIPCEnginerThrottleWidget {
 			buttonReglagecentreXmoins.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					centerX -= 1;
+					x1 -= 1;
 					repaint();
 				}
 			});
@@ -220,7 +221,7 @@ public class FSUIPCEnginerThrottleWidget {
 			buttonReglagecentreYplus.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					centerY -= 1;
+					y1 -= 1;
 					repaint();
 				}
 			});
@@ -232,7 +233,7 @@ public class FSUIPCEnginerThrottleWidget {
 			buttonReglagecentreYmoins.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					centerY += 1;
+					y1 += 1;
 					repaint();
 				}
 			});
@@ -407,22 +408,25 @@ public class FSUIPCEnginerThrottleWidget {
 				
 				/////////////////////////////////////////////////////////////
 				// jauge V1 (ligne)
-				g.setColor(Color.RED);
-				int x1 = centerX, x2 = x1, y1 = centerY, y2 = y1;
 
 				range = zeroAngle - maxAngle;
 
 				// TODO : Si la valeur est inférieur à 500 il faut gérer le fait que la jauge
 				// n'est pas proportionné pareil dans la zone.
 				// par exemple si on value=0 l'aiguille est en dessous.
-				double angleToUse = zeroAngle - 1.0 * range * (value * 1.0 / MAX_VALUE * 1.0);
-				x2 += (int) (Math.cos(Math.toRadians(angleToUse)) * centerX);
-				y2 -= (int) (Math.sin(Math.toRadians(angleToUse)) * centerY);
-				g.drawLine(x1, y1, x2, y2);
-				g.setFont(new Font("TimesRoman", Font.PLAIN, 20)); 
-				g.drawString("" + value, centerX-26, centerY + 59);				
+				Double angleToUse = zeroAngle - 1.0 * range * (value * 1.0 / MAX_VALUE * 1.0);
+				//x2 += (int) (Math.cos(Math.toRadians(angleToUse)) * centerX);
+				//y2 -= (int) (Math.sin(Math.toRadians(angleToUse)) * centerY);
 				
+
+				Point newPoint = rotateLineClockWise(new Point(x1,y1), new Point(x2,y2),angleToUse);
 				
+				g.setColor(Color.RED);
+				g.drawLine(x1, y1, ((Double)newPoint.getX()).intValue(), ((Double)newPoint.getY()).intValue());
+				//g.rotate(angleToUse);
+				//g.setFont(new Font("TimesRoman", Font.PLAIN, 20)); 
+				g.drawString("" + value, centerX-26, centerY + 59);	
+								
 				/*
 				 * Double x,y; x=(double) 10; y=(double) 10; double[] pt = {x, y}; double
 				 * angleToUse = zeroAngle - 1.0 * range * (value * 1.0 / MAX_VALUE * 1.0);
@@ -433,11 +437,11 @@ public class FSUIPCEnginerThrottleWidget {
 
 				if (afficherBoutonReglage) {
 					System.out.println("//////////////////////////////");
-					System.out.println("centerX : " + String.valueOf(centerX));
-					System.out.println("centerY : " + String.valueOf(centerY));
+					System.out.println("x1 : " + String.valueOf(x1));
+					System.out.println("y1 : " + String.valueOf(y1));
 					System.out.println("zeroAngle : " + String.valueOf(zeroAngle));
 					System.out.println("maxAngle : " + String.valueOf(maxAngle));
-					//System.out.println("angleToUse : " + String.valueOf(angleToUse));
+					System.out.println("angleToUse : " + String.valueOf(angleToUse));
 				}
 
 				/*
@@ -464,6 +468,13 @@ public class FSUIPCEnginerThrottleWidget {
 
 	}
 
+	
+	static Point rotateLineClockWise(Point center, Point edge, Double angle) {
+	    double xRot = (int) center.x + Math.cos(Math.toRadians(angle)) * (edge.x - center.x) - Math.sin(Math.toRadians(angle)) * (edge.y - center.y);
+	    double yRot = (int) center.y + Math.sin(Math.toRadians(angle)) * (edge.x - center.x) + Math.cos(Math.toRadians(angle)) * (edge.y - center.y);
+	    return new Point((int) xRot, (int) yRot);
+	}
+	
 	private void startFSUIPC(LeafPane myLeafPane) {
 		// First of all, load the native library. The default load function will try to
 		// determine if we are running under 32 or 64 bit JVM
@@ -498,7 +509,7 @@ public class FSUIPCEnginerThrottleWidget {
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						value = 0;
+						value = 500;
 					}
 				});
 
@@ -513,7 +524,7 @@ public class FSUIPCEnginerThrottleWidget {
 					@Override
 					public void run() {
 						System.out.println("Engine 1 RPM: " + String.valueOf(eng1_rpm_cont.getValue()));
-						value = eng1_rpm_cont.getValue().intValue();
+						if (!afficherBoutonReglage) value = eng1_rpm_cont.getValue().intValue();
 						myLeafPane.repaint();
 
 					}
