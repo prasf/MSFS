@@ -1,11 +1,9 @@
 package com.prasf.msfs.premierWidget;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
@@ -14,8 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Line2D;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.AbstractQueue;
@@ -100,7 +97,7 @@ public class FSUIPCEnginerThrottleWidget {
 				frame.addMouseListener(frameDragListener);
 				frame.addMouseMotionListener(frameDragListener);
 				frame.setAlwaysOnTop(true);
-				//frame.setShape(new Ellipse2D.Double(11, 10, 350, 350));
+				frame.setShape(new Ellipse2D.Double(11, 10, 350, 350));
 
 				byte result = FSUIPC.load();
 				if (result != FSUIPC.LIB_LOAD_RESULT_OK) {
