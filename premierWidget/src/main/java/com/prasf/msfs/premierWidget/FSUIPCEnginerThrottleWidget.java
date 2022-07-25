@@ -63,7 +63,7 @@ public class FSUIPCEnginerThrottleWidget {
 	// zeroAngle : 226.42142857142878
 	// maxAngle : -42.94999999999999
 	// angleToUse : 187.93979591836754
-	boolean afficherBoutonReglage = true;
+	boolean afficherBoutonReglage = false;
 	int centerX = 193;
 	int centerY = 181;
 	int x1 = centerX, x2 = 100, y1 = centerY, y2 = 278;
@@ -101,7 +101,8 @@ public class FSUIPCEnginerThrottleWidget {
 
 				byte result = FSUIPC.load();
 				if (result != FSUIPC.LIB_LOAD_RESULT_OK) {
-					System.out.println("Failed to load native library. Quiting...");
+
+					logger.info("Failed to load native library. Quiting...");
 					return;
 				} else
 
